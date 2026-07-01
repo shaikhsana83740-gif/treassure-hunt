@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M.E.S BCA Treasure Hunt</title>
+  <style>
+    body {
+      font-family: 'Trebuchet MS', sans-serif;
+      background: linear-gradient(135deg, #1abc9c, #3498db);
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 5px #000;
+    }
+    #reader {
+      width: 320px;
+      margin: 0 auto;
+      border: 5px solid #fff;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    #hint {
+      margin-top: 30px;
+      font-size: 1.3em;
+      background: rgba(255,255,255,0.2);
+      padding: 20px;
+      border-radius: 15px;
+      animation: glow 1s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from { box-shadow: 0 0 10px #f1c40f; }
+      to { box-shadow: 0 0 20px #e67e22; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🏴‍☠️ M.E.S BCA Treasure Hunt</h1>
+  <p>Scan your QR code to unlock the clue!</p>
+
+  <div id="reader"></div>
+  <div id="hint">🎯 Awaiting your scan...</div>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script>
+    const hintBox = document.getElementById("hint");
+
+    function onScanSuccess(decodedText) {
+      hintBox.innerHTML = `💡 Hint: ${decodedText}`;
+    }
+
+    function onScanFailure(error) {
+      // Ignore scan errors
+    }
+
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" }, // back camera
+      { fps: 10, qrbox: 250 },
+      onScanSuccess,
+      onScanFailure
+    );
+  </script>
+</body>
+</html>

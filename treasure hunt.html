@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MES Tech Hunt 2026</title>
+    <!-- Tailwind CSS for high-end styling -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- HTML5 QR Code Raw Library for High-Performance Scanning -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        .cyber-bg {
+            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+        }
+        /* Fixes blank rendering or camera freezes by forcing native video scaling */
+        #qr-reader-view video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 1rem;
+        }
+        .glow-red {
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.25);
+        }
+        .glow-victory {
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.35);
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+        }
+        
+        /* High-End Victory Confetti Keyframes */
+        @keyframes confettiDrop {
+            0% { transform: translateY(-20vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 16px;
+            opacity: 0;
+            z-index: 1;
+            animation: confettiDrop 4s linear infinite;
+        }
+    </style>
+</head>
+<body class="cyber-bg text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-red-500 overflow-x-hidden">
+
+    <!-- Screen 1: Welcome / Splash -->
+    <div id="screen-welcome" class="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8">
+        <div class="space-y-4">
+            <div class="inline-flex items-center space-x-2 bg-red-500/10 border border-red-500/30 px-4 py-1.5 rounded-full backdrop-blur-md">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                <span class="text-xs font-bold tracking-widest text-red-400 uppercase">System Active • 2026</span>
+            </div>
+            <h1 class="text-3xl font-black tracking-tight text-white sm:text-5xl bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent px-2">
+                M.E.S. VASANT JOSHI ARTS AND COMMERCE COLLEGE
+            </h1>
+            <div class="h-1 w-24 bg-red-600 mx-auto rounded-full shadow-[0_0_10px_#dc2626]"></div>
+            <p class="text-2xl font-extrabold text-red-500 tracking-widest uppercase">BCA Department</p>
+        </div>
+        
+        <div class="w-full max-w-sm bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-xl shadow-2xl">
+            <h2 class="text-lg font-bold text-slate-200 tracking-wide">Welcome, Contestants!</h2>
+            <p class="text-sm text-slate-400 mt-2 leading-relaxed">The ultimate digital treasure hunt is live. Locate the hidden QR targets around the campus grounds and scan them to complete your track phases.</p>
+        </div>
+
+        <button onclick="navigateTo('screen-rules')" class="w-full max-w-xs bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-4.5 px-8 rounded-xl shadow-xl shadow-red-900/40 transition-all text-lg tracking-widest transform active:scale-95 cursor-pointer">
+            START MISSION
+        </button>
+    </div>
+
+    <!-- Screen 2: Rules & Mission Briefing -->
+    <div id="screen-rules" class="hidden flex-1 flex flex-col justify-between p-6 max-w-md mx-auto w-full">
+        <div class="space-y-6 mt-4">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                <div class="w-3 h-6 bg-red-600 rounded-sm"></div>
+                <h2 class="text-2xl font-black uppercase tracking-wider text-white">Mission Briefing</h2>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-slate-900/30 border border-slate-800/60 p-4 rounded-xl flex items-start space-x-4">
+                    <span class="bg-red-500/10 text-red-400 font-black px-2.5 py-1 rounded-lg text-sm border border-red-500/20">01</span>
+                    <p class="text-sm text-slate-300 leading-relaxed pt-0.5">There are <strong class="text-white">3 total phases</strong>. Track down and locate the hidden QR codes across the campus layout.</p>
+                </div>
+                <div class="bg-slate-900/30 border border-slate-800/60 p-4 rounded-xl flex items-start space-x-4">
+                    <span class="bg-red-500/10 text-red-400 font-black px-2.5 py-1 rounded-lg text-sm border border-red-500/20">02</span>
+                    <p class="text-sm text-slate-300 leading-relaxed pt-0.5">Scan <strong class="text-white">2 QR codes</strong> per phase to verify your path and unlock subsequent levels.</p>
+                </div>
+                <div class="bg-slate-900/30 border border-slate-800/60 p-4 rounded-xl flex items-start space-x-4">
+                    <span class="bg-red-500/10 text-red-400 font-black px-2.5 py-1 rounded-lg text-sm border border-red-500/20">03</span>
+                    <p class="text-sm text-slate-300 leading-relaxed pt-0.5">Ensure camera authorization flags are accepted on your browser layout.</p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="startPhase(1)" class="w-full bg-white hover:bg-slate-100 text-slate-950 font-black py-4 px-6 rounded-xl transition-all shadow-xl text-center mt-8 tracking-widest uppercase cursor-pointer">
+            ENTER PHASE 1
+        </button>
+    </div>
+
+    <!-- Screen 3: Gameplay -->
+    <div id="screen-game" class="hidden flex-1 flex flex-col p-6 space-y-6 justify-between max-w-md mx-auto w-full">
+        
+        <!-- Top Status Display -->
+        <div class="grid grid-cols-2 gap-3 bg-slate-900/60 border border-slate-800 p-4 rounded-xl backdrop-blur-md">
+            <div>
+                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Active State</span>
+                <h3 id="game-phase-title" class="text-lg font-black text-red-500">PHASE 1</h3>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Progress Block</span>
+                <h3 id="game-qr-progress" class="text-lg font-black text-white">0 / 2 SCANNED</h3>
+            </div>
+        </div>
+
+        <!-- 60FPS Native Stream Viewport Container -->
+        <div class="w-full aspect-square overflow-hidden rounded-2xl border-2 border-slate-800 bg-black shadow-2xl relative glow-red my-auto">
+            <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_10px_#ef4444] animate-[bounce_2s_infinite] z-10 pointer-events-none"></div>
+            
+            <div id="qr-reader-view" class="w-full h-full"></div>
+        </div>
+
+        <div class="text-center p-2">
+            <p class="text-xs text-slate-400 tracking-wide font-medium">Point your camera viewport directly at the checkpoint QR code</p>
+        </div>
+    </div>
+
+    <!-- Screen 4: Hint Display Intermediary Page -->
+    <div id="screen-hint-complete" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 max-w-md mx-auto w-full">
+        <div class="w-20 h-20 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center border border-amber-500/20 shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 animate-pulse">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+        </div>
+        <div class="space-y-4 w-full">
+            <h2 id="hint-screen-header" class="text-2xl font-black text-white uppercase tracking-wide">Data Packet Decrypted!</h2>
+            
+            <div class="bg-slate-900 border-2 border-dashed border-amber-500/40 p-5 rounded-xl max-w-xs mx-auto shadow-inner">
+                <span id="hint-token-title" class="text-[10px] font-bold text-amber-400 tracking-widest uppercase block mb-1.5">SYSTEM CLUE VECTOR:</span>
+                <p id="scanned-content-text" class="text-base text-slate-100 font-mono whitespace-pre-line font-bold leading-relaxed">Reading...</p>
+            </div>
+        </div>
+        <button id="hint-routing-action-btn" onclick="handleHintScreenProceed()" class="w-full max-w-xs bg-gradient-to-r from-amber-600 to-red-600 text-white font-black py-4.5 px-6 rounded-xl shadow-lg uppercase tracking-widest text-sm cursor-pointer transform active:scale-95 transition-all">
+            CONTINUE MISSION
+        </button>
+    </div>
+
+    <!-- Screen 5: Clean Isolated Phase Celebration Screen -->
+    <div id="screen-phase-celebration" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8 max-w-md mx-auto w-full">
+        <div class="w-24 h-24 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center border border-emerald-500/20 shadow-2xl shadow-emerald-950/40">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-12 h-12">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+        </div>
+
+        <div class="w-full px-2">
+            <div class="bg-slate-900 border-2 border-emerald-500/30 p-6 rounded-2xl shadow-2xl">
+                <h3 id="completion-message" class="text-xl font-black text-emerald-400 tracking-wide uppercase leading-snug">
+                    CONGRATULATION YOU HAVE FINISHED THE 1ST PHASE
+                </h3>
+            </div>
+        </div>
+
+        <button id="next-phase-celebration-btn" onclick="startNextPhase()" class="w-full max-w-xs bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-4.5 px-6 rounded-xl shadow-xl transition-all uppercase tracking-widest text-sm cursor-pointer transform active:scale-95">
+            PROCEED TO NEXT PHASE
+        </button>
+    </div>
+
+    <!-- Screen 6: Ultimate Winner Celebration Screen (Removed instruction footer) -->
+    <div id="screen-victory" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8 max-w-md mx-auto w-full relative">
+        <!-- Live Particle Engine Anchoring Point -->
+        <div id="confetti-cannon-field" class="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl"></div>
+        
+        <div class="absolute inset-0 bg-gradient-to-b from-amber-500/15 via-transparent to-transparent pointer-events-none rounded-2xl"></div>
+        
+        <!-- Hyper-Attractive Animated Trophy -->
+        <div class="relative group">
+            <div class="absolute inset-0 bg-amber-500 rounded-full blur-2xl opacity-40 animate-pulse"></div>
+            <div class="w-28 h-28 bg-gradient-to-b from-amber-400 to-orange-600 text-amber-100 rounded-full flex items-center justify-center border-2 border-amber-300 shadow-[0_0_50px_rgba(245,158,11,0.4)] relative z-10 transform scale-110">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-16 h-16 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] animate-[bounce_2s_infinite]">
+                    <path fill-rule="evenodd" d="M5.166 2.621A1 1 0 0 1 6 2h12a1 1 0 0 1 .834.479L21.166 6H22a1 1 0 1 1 0 2h-1.547l-1.4 10.5a3 3 0 0 1-2.986 2.5h-8.134a3 3 0 0 1-2.986-2.5L3.547 8H2a1 1 0 1 1 0-2h.834l2.332-3.379ZM5.453 8l1.233 9.25A1 1 0 0 0 7.673 18h8.654a1 1 0 0 0 .987-.85L18.547 8H5.453ZM16 4H8v2h8V4Z" clip-rule="evenodd" />
+                    <path d="M7 9a1 1 0 0 1 1-1h8a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1Z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="space-y-2 relative z-10">
+            <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-orange-500 tracking-tight uppercase glow-victory">
+                HUNT COMPLETED
+            </h2>
+            <div class="h-1.5 w-40 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto rounded-full shadow-[0_0_20px_#f59e0b]"></div>
+        </div>
+
+        <!-- Premium Winner Card Box -->
+        <div class="w-full bg-slate-900/90 border-2 border-amber-400/40 rounded-3xl p-7 shadow-[0_0_40px_rgba(0,0,0,0.7)] space-y-5 backdrop-blur-xl relative z-10 transform translate-y-1">
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-600 text-[10px] font-black tracking-widest text-slate-950 px-4 py-1 rounded-full uppercase shadow-md border border-amber-300">
+                CHAMPIONS DECK
+            </div>
+            
+            <p class="text-xl font-black text-white uppercase tracking-wider pt-2">CONGRATULATIONS, FINALISTS!</p>
+            <p class="text-sm text-slate-300 leading-relaxed font-medium">You have safely identified every encrypted anchor node across the whole perimeter mapping layout.</p>
+            
+            <div class="text-xs text-amber-300 font-mono bg-amber-500/10 py-3 px-4 border border-amber-500/30 rounded-xl font-black tracking-wide shadow-inner">
+                STATUSCODE: ELITE_CHAMPIONS_UNLOCKED
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Branding Navbar -->
+    <footer class="p-4 text-center text-[10px] text-slate-600 uppercase tracking-widest font-black border-t border-slate-900 bg-slate-950/60 backdrop-blur-md">
+        MES Vasant Joshi College • BCA Event Portal 2026
+    </footer>
+
+    <!-- Logic Controller Core Engine -->
+    <script>
+        let currentPhase = 1;
+        let qrScannedInCurrentPhase = 0;
+        let html5QrCode = null;
+        let lastDecodedText = "";
+
+        function navigateTo(screenId) {
+            document.getElementById('screen-welcome').classList.add('hidden');
+            document.getElementById('screen-rules').classList.add('hidden');
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-hint-complete').classList.add('hidden');
+            document.getElementById('screen-phase-celebration').classList.add('hidden');
+            document.getElementById('screen-victory').classList.add('hidden');
+            
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            if(screenId === 'screen-victory') {
+                launchConfettiCannon();
+            }
+        }
+
+        function startPhase(phaseNum) {
+            currentPhase = phaseNum;
+            qrScannedInCurrentPhase = 0;
+            navigateTo('screen-game');
+            updateGameUI();
+            initHighSpeedScanner();
+        }
+
+        function updateGameUI() {
+            document.getElementById('game-phase-title').innerText = `PHASE ${currentPhase}`;
+            document.getElementById('game-qr-progress').innerText = `${qrScannedInCurrentPhase} / 2 SCANNED`;
+        }
+
+        function initHighSpeedScanner() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    startCameraStream();
+                }).catch(() => {
+                    startCameraStream();
+                });
+            } else {
+                startCameraStream();
+            }
+        }
+
+        function startCameraStream() {
+            html5QrCode = new Html5Qrcode("qr-reader-view");
+            
+            const config = {
+                fps: 30,
+                qrbox: (viewfinderWidth, viewfinderHeight) => {
+                    const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                    return { width: minEdge * 0.75, height: minEdge * 0.75 };
+                }
+            };
+
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                config,
+                onScanSuccess,
+                onScanFailure
+            ).catch(err => {
+                console.error("Camera core engine attachment fault:", err);
+            });
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            qrScannedInCurrentPhase++;
+            lastDecodedText = decodedText;
+            
+            html5QrCode.stop().then(() => {
+                document.getElementById('scanned-content-text').innerText = decodedText;
+                
+                let routingBtn = document.getElementById('hint-routing-action-btn');
+                if (qrScannedInCurrentPhase === 1) {
+                    document.getElementById('hint-screen-header').innerText = "Checkpoint 1 Secure!";
+                    document.getElementById('hint-token-title').innerText = "CLUE VECTOR TOKEN DATA:";
+                    routingBtn.innerText = "ACTIVATE SCANNER 2";
+                } else if (qrScannedInCurrentPhase === 2) {
+                    document.getElementById('hint-screen-header').innerText = "Final Checkpoint Verified!";
+                    document.getElementById('hint-token-title').innerText = "VERIFICATION BLOCK LOG DATA:";
+                    routingBtn.innerText = "PROCEED TO VERIFICATION →";
+                }
+                
+                navigateTo('screen-hint-complete');
+            }).catch(err => {
+                console.error("Stream suspension synchronization leak:", err);
+            });
+        }
+
+        function onScanFailure(error) {}
+
+        function handleHintScreenProceed() {
+            if (qrScannedInCurrentPhase === 1) {
+                navigateTo('screen-game');
+                updateGameUI();
+                initHighSpeedScanner();
+            } else if (qrScannedInCurrentPhase === 2) {
+                triggerMilestoneCelebrationPage();
+            }
+        }
+
+        function triggerMilestoneCelebrationPage() {
+            let phaseSuffix = (currentPhase === 1) ? "1ST" : (currentPhase === 2) ? "2ND" : "3RD";
+            document.getElementById('completion-message').innerText = `CONGRATULATION YOU HAVE FINISHED THE ${phaseSuffix} PHASE`;
+            
+            let celebrationBtn = document.getElementById('next-phase-celebration-btn');
+            
+            if (currentPhase === 3) {
+                celebrationBtn.innerText = "CLAIM GRAND VICTORY 🏆";
+                celebrationBtn.className = "w-full max-w-xs bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black py-4.5 px-6 rounded-xl shadow-2xl uppercase tracking-widest text-sm cursor-pointer transform active:scale-95";
+                celebrationBtn.onclick = function() {
+                    navigateTo('screen-victory');
+                };
+            } else {
+                celebrationBtn.innerText = `START PHASE ${currentPhase + 1} →`;
+                celebrationBtn.className = "w-full max-w-xs bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-4.5 px-6 rounded-xl shadow-xl uppercase tracking-widest text-sm cursor-pointer transform active:scale-95";
+                celebrationBtn.onclick = startNextPhase;
+            }
+            
+            navigateTo('screen-phase-celebration');
+        }
+
+        function startNextPhase() {
+            currentPhase++;
+            startPhase(currentPhase);
+        }
+
+        // Live Dynamic Victory Particles Engine Simulation
+        function launchConfettiCannon() {
+            const colors = ['#f59e0b', '#fbbf24', '#34d399', '#60a5fa', '#f472b6'];
+            const container = document.getElementById('confetti-cannon-field');
+            container.innerHTML = ''; 
+            
+            for (let i = 0; i < 45; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                container.appendChild(confetti);
+            }
+        }
+    </script>
+</body>
+</html>
