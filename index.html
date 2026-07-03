@@ -138,6 +138,12 @@
                 <span id="hint-token-title" class="text-[10px] font-bold text-amber-400 tracking-widest uppercase block mb-1.5">SYSTEM CLUE VECTOR:</span>
                 <p id="scanned-content-text" class="text-base text-slate-100 font-mono whitespace-pre-line font-bold leading-relaxed">Reading...</p>
             </div>
+            <div id="logic-puzzle-card" class="mt-6 bg-slate-950/80 border border-amber-500/20 p-5 rounded-2xl max-w-xs mx-auto shadow-inner hidden">
+                <span class="text-[10px] font-bold text-amber-400 tracking-widest uppercase block mb-3">DECRYPTION PUZZLE:</span>
+                <p id="puzzle-question-text" class="text-sm text-slate-200 leading-relaxed font-medium"></p>
+                <input id="puzzle-answer-input" type="text" placeholder="Enter your answer" class="mt-4 w-full bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl text-slate-100 focus:outline-none focus:border-amber-400" />
+                <p id="puzzle-feedback-text" class="mt-3 text-sm text-rose-400 hidden"></p>
+            </div>
         </div>
         <button id="hint-routing-action-btn" onclick="handleHintScreenProceed()" class="w-full max-w-xs bg-gradient-to-r from-amber-600 to-red-600 text-white font-black py-4.5 px-6 rounded-xl shadow-lg uppercase tracking-widest text-sm cursor-pointer transform active:scale-95 transition-all">
             CONTINUE MISSION
@@ -216,6 +222,22 @@
         let qrScannedInCurrentPhase = 0;
         let html5QrCode = null;
         let lastDecodedText = "";
+        let puzzleSolved = false;
+
+        const puzzleChallenges = {
+            1: {
+                question: "Solve the logic riddle: A code keypad has 4 digits. The first is 2, the second is 3, the third is the average of the first two, and the fourth is the difference between the second and first. What is the four-digit code?",
+                answer: "2361"
+            },
+            2: {
+                question: "Math challenge: If you multiply this number by 3 and then subtract 4, the result is 17. What is the original number?",
+                answer: "7"
+            },
+            3: {
+                question: "Final clue: Three consecutive numbers add up to 42. What is the middle number?",
+                answer: "14"
+            }
+        };
 
         function navigateTo(screenId) {
             document.getElementById('screen-welcome').classList.add('hidden');
@@ -235,6 +257,8 @@
         function startPhase(phaseNum) {
             currentPhase = phaseNum;
             qrScannedInCurrentPhase = 0;
+            puzzleSolved = false;
+            hidePuzzleCard();
             navigateTo('screen-game');
             updateGameUI();
             initHighSpeedScanner();
@@ -289,11 +313,15 @@
                 if (qrScannedInCurrentPhase === 1) {
                     document.getElementById('hint-screen-header').innerText = "Checkpoint 1 Secure!";
                     document.getElementById('hint-token-title').innerText = "CLUE VECTOR TOKEN DATA:";
-                    routingBtn.innerText = "ACTIVATE SCANNER 2";
+                    routingBtn.innerText = "SUBMIT ANSWER";
+                    routingBtn.onclick = handleHintScreenProceed;
+                    showPuzzleCard(currentPhase);
                 } else if (qrScannedInCurrentPhase === 2) {
                     document.getElementById('hint-screen-header').innerText = "Final Checkpoint Verified!";
                     document.getElementById('hint-token-title').innerText = "VERIFICATION BLOCK LOG DATA:";
                     routingBtn.innerText = "PROCEED TO VERIFICATION →";
+                    routingBtn.onclick = handleHintScreenProceed;
+                    hidePuzzleCard();
                 }
                 
                 navigateTo('screen-hint-complete');
@@ -306,11 +334,65 @@
 
         function handleHintScreenProceed() {
             if (qrScannedInCurrentPhase === 1) {
+                if (!puzzleSolved) {
+                    validatePuzzleAnswer();
+                    return;
+                }
                 navigateTo('screen-game');
                 updateGameUI();
                 initHighSpeedScanner();
             } else if (qrScannedInCurrentPhase === 2) {
                 triggerMilestoneCelebrationPage();
+            }
+        }
+
+        function validatePuzzleAnswer() {
+            const answerInput = document.getElementById('puzzle-answer-input');
+            const feedback = document.getElementById('puzzle-feedback-text');
+            const expectedAnswer = puzzleChallenges[currentPhase]?.answer;
+            const userAnswer = answerInput.value.trim();
+
+            if (!userAnswer) {
+                feedback.innerText = 'Please enter an answer to continue.';
+                feedback.classList.remove('hidden');
+                return;
+            }
+
+            if (userAnswer.toLowerCase() === expectedAnswer.toLowerCase()) {
+                puzzleSolved = true;
+                feedback.innerText = 'Correct! Scanner 2 has been unlocked.';
+                feedback.classList.remove('hidden');
+                feedback.classList.remove('text-rose-400');
+                feedback.classList.add('text-emerald-400');
+                document.getElementById('hint-routing-action-btn').innerText = 'ACTIVATE SCANNER 2';
+                return;
+            }
+
+            feedback.innerText = 'That answer is not correct. Try again.';
+            feedback.classList.remove('hidden');
+            feedback.classList.add('text-rose-400');
+        }
+
+        function showPuzzleCard(phase) {
+            const card = document.getElementById('logic-puzzle-card');
+            const questionText = document.getElementById('puzzle-question-text');
+            const answerInput = document.getElementById('puzzle-answer-input');
+            const feedback = document.getElementById('puzzle-feedback-text');
+
+            questionText.innerText = puzzleChallenges[phase]?.question || 'Solve this challenge to continue.';
+            answerInput.value = '';
+            feedback.innerText = '';
+            feedback.classList.add('hidden');
+            card.classList.remove('hidden');
+        }
+
+        function hidePuzzleCard() {
+            const card = document.getElementById('logic-puzzle-card');
+            const feedback = document.getElementById('puzzle-feedback-text');
+            if (card) card.classList.add('hidden');
+            if (feedback) {
+                feedback.innerText = '';
+                feedback.classList.add('hidden');
             }
         }
 
