@@ -150,7 +150,23 @@
         </button>
     </div>
 
-    <!-- Screen 5: Clean Isolated Phase Celebration Screen -->
+    <!-- Screen 5: Failure Screen -->
+    <div id="screen-failure" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 max-w-md mx-auto w-full">
+        <div class="w-24 h-24 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center border border-rose-500/20 shadow-2xl">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-12 h-12">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+        <div class="w-full bg-slate-900/90 border border-rose-500/30 p-6 rounded-3xl shadow-xl">
+            <h2 class="text-2xl font-black text-rose-400 uppercase tracking-wide">ACCESS DENIED</h2>
+            <p id="failure-screen-message" class="mt-4 text-sm text-slate-300 leading-relaxed">You have exceeded the allowed QR scan attempts after round 1. No success path is available.</p>
+        </div>
+        <button onclick="resetGame(); navigateTo('screen-welcome');" class="w-full max-w-xs bg-gradient-to-r from-rose-600 to-red-600 text-white font-black py-4.5 px-6 rounded-xl shadow-lg uppercase tracking-widest text-sm cursor-pointer transform active:scale-95 transition-all">
+            RETURN TO START
+        </button>
+    </div>
+
+    <!-- Screen 6: Clean Isolated Phase Celebration Screen -->
     <div id="screen-phase-celebration" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8 max-w-md mx-auto w-full">
         <div class="w-24 h-24 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center border border-emerald-500/20 shadow-2xl shadow-emerald-950/40">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-12 h-12">
@@ -224,6 +240,7 @@
         let lastDecodedText = "";
         let puzzleSolved = false;
 
+        const phase2ScanCap = 6;
         const puzzleChallenges = {
             1: {
                 question: "Solve the logic riddle: A code keypad has 4 digits. The first is 2, the second is 3, the third is the average of the first two, and the fourth is the difference between the second and first. What is the four-digit code?",
@@ -246,6 +263,7 @@
             document.getElementById('screen-hint-complete').classList.add('hidden');
             document.getElementById('screen-phase-celebration').classList.add('hidden');
             document.getElementById('screen-victory').classList.add('hidden');
+            document.getElementById('screen-failure').classList.add('hidden');
             
             document.getElementById(screenId).classList.remove('hidden');
             
@@ -265,8 +283,9 @@
         }
 
         function updateGameUI() {
+            const maxScans = currentPhase === 2 ? phase2ScanCap : 2;
             document.getElementById('game-phase-title').innerText = `PHASE ${currentPhase}`;
-            document.getElementById('game-qr-progress').innerText = `${qrScannedInCurrentPhase} / 2 SCANNED`;
+            document.getElementById('game-qr-progress').innerText = `${qrScannedInCurrentPhase} / ${maxScans} SCANNED`;
         }
 
         function initHighSpeedScanner() {
@@ -305,12 +324,30 @@
         function onScanSuccess(decodedText, decodedResult) {
             qrScannedInCurrentPhase++;
             lastDecodedText = decodedText;
+
+            if (currentPhase === 2 && qrScannedInCurrentPhase >= phase2ScanCap) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('failure-screen-message').innerText = 'Phase 2 scan limit reached. No access granted after the last QR.';
+                    navigateTo('screen-failure');
+                }).catch(err => {
+                    console.error("Stream suspension synchronization leak:", err);
+                    navigateTo('screen-failure');
+                });
+                return;
+            }
             
             html5QrCode.stop().then(() => {
                 document.getElementById('scanned-content-text').innerText = decodedText;
                 
                 let routingBtn = document.getElementById('hint-routing-action-btn');
-                if (qrScannedInCurrentPhase === 1) {
+                if (currentPhase === 2) {
+                    const remaining = phase2ScanCap - qrScannedInCurrentPhase;
+                    document.getElementById('hint-screen-header').innerText = qrScannedInCurrentPhase === phase2ScanCap - 1 ? "Last QR attempt: 2 participants remain." : `Participant eliminated. ${remaining + 1} remain.`;
+                    document.getElementById('hint-token-title').innerText = "ELIMINATION CHECKPOINT:";
+                    routingBtn.innerText = "CONTINUE";
+                    routingBtn.onclick = handleHintScreenProceed;
+                    hidePuzzleCard();
+                } else if (qrScannedInCurrentPhase === 1) {
                     document.getElementById('hint-screen-header').innerText = "Checkpoint 1 Secure!";
                     document.getElementById('hint-token-title').innerText = "CLUE VECTOR TOKEN DATA:";
                     routingBtn.innerText = "SUBMIT ANSWER";
@@ -420,6 +457,16 @@
         function startNextPhase() {
             currentPhase++;
             startPhase(currentPhase);
+        }
+
+        function resetGame() {
+            currentPhase = 1;
+            qrScannedInCurrentPhase = 0;
+            puzzleSolved = false;
+            hidePuzzleCard();
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(() => {});
+            }
         }
 
         // Live Dynamic Victory Particles Engine Simulation

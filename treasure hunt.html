@@ -138,13 +138,35 @@
                 <span id="hint-token-title" class="text-[10px] font-bold text-amber-400 tracking-widest uppercase block mb-1.5">SYSTEM CLUE VECTOR:</span>
                 <p id="scanned-content-text" class="text-base text-slate-100 font-mono whitespace-pre-line font-bold leading-relaxed">Reading...</p>
             </div>
+            <div id="logic-puzzle-card" class="mt-6 bg-slate-950/80 border border-amber-500/20 p-5 rounded-2xl max-w-xs mx-auto shadow-inner hidden">
+                <span class="text-[10px] font-bold text-amber-400 tracking-widest uppercase block mb-3">DECRYPTION PUZZLE:</span>
+                <p id="puzzle-question-text" class="text-sm text-slate-200 leading-relaxed font-medium"></p>
+                <input id="puzzle-answer-input" type="text" placeholder="Enter your answer" class="mt-4 w-full bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl text-slate-100 focus:outline-none focus:border-amber-400" />
+                <p id="puzzle-feedback-text" class="mt-3 text-sm text-rose-400 hidden"></p>
+            </div>
         </div>
         <button id="hint-routing-action-btn" onclick="handleHintScreenProceed()" class="w-full max-w-xs bg-gradient-to-r from-amber-600 to-red-600 text-white font-black py-4.5 px-6 rounded-xl shadow-lg uppercase tracking-widest text-sm cursor-pointer transform active:scale-95 transition-all">
             CONTINUE MISSION
         </button>
     </div>
 
-    <!-- Screen 5: Clean Isolated Phase Celebration Screen -->
+    <!-- Screen 5: Failure Screen -->
+    <div id="screen-failure" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 max-w-md mx-auto w-full">
+        <div class="w-24 h-24 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center border border-rose-500/20 shadow-2xl">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-12 h-12">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+        <div class="w-full bg-slate-900/90 border border-rose-500/30 p-6 rounded-3xl shadow-xl">
+            <h2 class="text-2xl font-black text-rose-400 uppercase tracking-wide">ACCESS DENIED</h2>
+            <p id="failure-screen-message" class="mt-4 text-sm text-slate-300 leading-relaxed">You have exceeded the allowed QR scan attempts after round 1. No success path is available.</p>
+        </div>
+        <button onclick="resetGame(); navigateTo('screen-welcome');" class="w-full max-w-xs bg-gradient-to-r from-rose-600 to-red-600 text-white font-black py-4.5 px-6 rounded-xl shadow-lg uppercase tracking-widest text-sm cursor-pointer transform active:scale-95 transition-all">
+            RETURN TO START
+        </button>
+    </div>
+
+    <!-- Screen 6: Clean Isolated Phase Celebration Screen -->
     <div id="screen-phase-celebration" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8 max-w-md mx-auto w-full">
         <div class="w-24 h-24 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center border border-emerald-500/20 shadow-2xl shadow-emerald-950/40">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-12 h-12">
@@ -224,6 +246,7 @@
             document.getElementById('screen-hint-complete').classList.add('hidden');
             document.getElementById('screen-phase-celebration').classList.add('hidden');
             document.getElementById('screen-victory').classList.add('hidden');
+            document.getElementById('screen-failure').classList.add('hidden');
             
             document.getElementById(screenId).classList.remove('hidden');
             
@@ -241,8 +264,9 @@
         }
 
         function updateGameUI() {
+            const maxScans = currentPhase === 2 ? phase2ScanCap : 2;
             document.getElementById('game-phase-title').innerText = `PHASE ${currentPhase}`;
-            document.getElementById('game-qr-progress').innerText = `${qrScannedInCurrentPhase} / 2 SCANNED`;
+            document.getElementById('game-qr-progress').innerText = `${qrScannedInCurrentPhase} / ${maxScans} SCANNED`;
         }
 
         function initHighSpeedScanner() {
@@ -281,12 +305,28 @@
         function onScanSuccess(decodedText, decodedResult) {
             qrScannedInCurrentPhase++;
             lastDecodedText = decodedText;
+
+            if (currentPhase === 2 && qrScannedInCurrentPhase >= phase2ScanCap) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('failure-screen-message').innerText = 'Phase 2 scan limit reached. No access granted after the last QR.';
+                    navigateTo('screen-failure');
+                }).catch(err => {
+                    console.error("Stream suspension synchronization leak:", err);
+                    navigateTo('screen-failure');
+                });
+                return;
+            }
             
             html5QrCode.stop().then(() => {
                 document.getElementById('scanned-content-text').innerText = decodedText;
                 
                 let routingBtn = document.getElementById('hint-routing-action-btn');
-                if (qrScannedInCurrentPhase === 1) {
+                if (currentPhase === 2) {
+                    document.getElementById('hint-screen-header').innerText = qrScannedInCurrentPhase === phase2ScanCap - 1 ? "Last QR attempt: 2 participants remain." : `Phase 2 elimination scan ${qrScannedInCurrentPhase}`;
+                    document.getElementById('hint-token-title').innerText = "ELIMINATION CHECKPOINT:";
+                    routingBtn.innerText = "CONTINUE";
+                    routingBtn.onclick = handleHintScreenProceed;
+                } else if (qrScannedInCurrentPhase === 1) {
                     document.getElementById('hint-screen-header').innerText = "Checkpoint 1 Secure!";
                     document.getElementById('hint-token-title').innerText = "CLUE VECTOR TOKEN DATA:";
                     routingBtn.innerText = "ACTIVATE SCANNER 2";
@@ -338,6 +378,15 @@
         function startNextPhase() {
             currentPhase++;
             startPhase(currentPhase);
+        }
+
+        function resetGame() {
+            currentPhase = 1;
+            qrScannedInCurrentPhase = 0;
+            hidePuzzleCard();
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(() => {});
+            }
         }
 
         // Live Dynamic Victory Particles Engine Simulation
